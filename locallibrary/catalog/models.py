@@ -122,3 +122,4 @@ class Author(models.Model):
     def __str__(self):
         """String para representar o objeto do Modelo"""
         return f'{self.last_name}, {self.first_name}'
+
