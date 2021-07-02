@@ -48,11 +48,11 @@ class Book(models.Model):
     class Meta:
         ordering = ['title', 'author']
 
-    def display_genere(self):
+    def display_genre(self):
         """Cria uma string para o gênero. Requerido para aparecer em Admin"""
         return ', '.join([genre.name for genre in self.genre.all()[:3]])
 
-    display_genere.short_description = 'Genre'
+    display_genre.short_description = 'Genre'
 
     def __str__(self):
         """String para representar o objeto Modelo"""
