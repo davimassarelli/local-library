@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.views import generic
+
 from .models import Book, Author, BookInstance, Genre
 
 
@@ -32,3 +34,26 @@ def index(request):
 
     # Renderizar o HTML template index.html com os dados dentro do contexto variável
     return render(request, 'index.html', context=context)
+
+
+class BookListView(generic.ListView):
+    model = Book
+    paginate_by = 10
+    """
+    context_object_name = 'my_book_list'  # Seu nome para a lista como template variável
+    queryset = Book.objects.filter(title__icontains='história')[:5]  # obter 5 livros contendo no título história
+    template_name = 'books/my_arbitrary_name_list.html'  # Especifique o nome/localização do seu template
+    """
+
+
+class BookDetailView(generic.DetailView):
+    model = Book
+
+
+class AuthorListView(generic.ListView):
+    model = Author
+    paginate_by = 10
+
+
+class AuthorDetailView(generic.DetailView):
+    model = Author
