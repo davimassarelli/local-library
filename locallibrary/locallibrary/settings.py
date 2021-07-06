@@ -126,3 +126,10 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '/'
+
+# Retorno do link de redefinição diretamente no console, para que seja possível redefinir sem suporte ao e-mail.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Excluir posteriormente!
+
