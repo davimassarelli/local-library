@@ -2,6 +2,8 @@ import uuid
 
 from django.db import models
 from django.urls import reverse  # Utilizado para gerarar URLs revertendo o URL patterns.
+from django.contrib.auth.models import User
+from datetime import date
 
 
 class Genre(models.Model):
@@ -61,9 +63,6 @@ class Book(models.Model):
     def get_absolute_url(self):
         """Retorna a url para acessar os detalhes atribuidos ao livro"""
         return reverse('book-detail', args=[str(self.id)])
-
-from datetime import date
-from django.contrib.auth.models import User
 
 
 class BookInstance(models.Model):
