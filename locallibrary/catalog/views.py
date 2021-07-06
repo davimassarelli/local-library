@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views import generic
@@ -78,3 +78,14 @@ class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact='o').order_by('due_back')
+
+
+class LoanedBooksListView(LoginRequiredMixin, generic.ListView):
+    """Lista genérica para visualização de todos os livros emprestados (somente bibliotecários)"""
+    permission_required = 'catalog.can_mark_returned'  # É mais eficaz travar diretamente na urls.py
+    model = BookInstance
+    template_name = 'catalog/bookinstance_list_all_borrowed.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return BookInstance.objects.filter(status__exact='o').order_by('due_back')
