@@ -1,12 +1,17 @@
+import datetime
+
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views import generic
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 from .models import Book, Author, BookInstance, Genre
+from .forms import RenewBookForm
 
 
-@login_required
+#  @login_required
 def index(request):
     """Função View para a home page do site"""
 
@@ -89,3 +94,35 @@ class LoanedBooksListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return BookInstance.objects.filter(status__exact='o').order_by('due_back')
+
+
+@permission_required('catalog.can_mark_returned')
+def renew_book_librarian(request, pk):
+    book_instance = get_object_or_404(BookInstance, pk=pk)
+
+    # Se este é um POST request, então processe os dados do Form
+    if request.method == 'POST':
+
+        # Cria um formulario e popula eles com os dados da requisição (binding)
+        form = RenewBookForm(request.POST)
+
+        # Verifica se o formulário é valido
+        if form.is_valid():
+            # processa os dados no form.cleaned_data como requerido (aqui apenas escrevemos isto para o modelo form due_back)
+            book_instance.due_back = form.cleaned_data['renewal_date']
+            book_instance.save()
+
+            # Redireciona para a nova URL
+            return HttpResponseRedirect(reverse('all-borrowed'))
+
+    # Se é um GET (ou outro metodo) cria um formulário padrão
+    else:
+        proposed_renew_date = datetime.date.today() + datetime.timedelta(weeks=3)
+        form = RenewBookForm(initial={'renewal_date': proposed_renew_date})
+
+    context = {
+        'form': form,
+        'book_instance': book_instance,
+    }
+
+    return render(request, 'catalog/book_renew_librarian.html', context)
