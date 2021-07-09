@@ -21,3 +21,4 @@ class RenewBookForm(forms.Form):
 
         # Lembrar de sempre retornar o campo vazio
         return data
+
