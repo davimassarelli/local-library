@@ -21,4 +21,4 @@ jobs:
         py -m pip install django
     - name: Rodar testes Automáticos
       run: |
-        py manage.py test
+        py locallibrary/manage.py test
