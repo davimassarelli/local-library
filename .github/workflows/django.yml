@@ -19,8 +19,6 @@ jobs:
       run: |
         py -m venv testes
         py -m pip install django
-        py -m pip install pip-tools
-        py -m pip install pytest-django
     - name: Rodar testes Automáticos
       run: |
         py manage.py test
