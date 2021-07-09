@@ -23,6 +23,4 @@ jobs:
         py -m pip install pytest-django
     - name: Rodar testes Automáticos
       run: |
-        pytest webdev/
-      shell: powershell
-
+        py manage.py test
