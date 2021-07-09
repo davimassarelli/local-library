@@ -1,0 +1,24 @@
+name: Aplicação Django
+
+on: [pull_request]
+
+jobs:
+  build:
+    env:
+      PIPENV_NO_INHERIT: 1
+      PIPENV_IGNORE_VIRTUALENVS: 1
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9.5
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9.5
+    - name: Instalar Dependências
+      run: |
+        py -m venv testes
+        py -m pip install django
+    - name: Rodar testes Automáticos
+      run: |
+        py manage.py test

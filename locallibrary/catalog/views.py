@@ -1,12 +1,18 @@
-from django.contrib.auth.decorators import login_required
+import datetime
+
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views import generic
+from django.http import HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import Book, Author, BookInstance, Genre
+from .forms import RenewBookForm
 
 
-@login_required
+#  @login_required
 def index(request):
     """Função View para a home page do site"""
 
@@ -78,3 +84,62 @@ class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact='o').order_by('due_back')
+
+
+class LoanedBooksListView(LoginRequiredMixin, generic.ListView):
+    """Lista genérica para visualização de todos os livros emprestados (somente bibliotecários)"""
+    permission_required = 'catalog.can_mark_returned'  # É mais eficaz travar diretamente na urls.py
+    model = BookInstance
+    template_name = 'catalog/bookinstance_list_all_borrowed.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return BookInstance.objects.filter(status__exact='o').order_by('due_back')
+
+
+@permission_required('catalog.can_mark_returned')
+def renew_book_librarian(request, pk):
+    book_instance = get_object_or_404(BookInstance, pk=pk)
+
+    # Se este é um POST request, então processe os dados do Form
+    if request.method == 'POST':
+
+        # Cria um formulario e popula eles com os dados da requisição (binding)
+        form = RenewBookForm(request.POST)
+
+        # Verifica se o formulário é valido
+        if form.is_valid():
+            # processa os dados no form.cleaned_data como requerido (aqui apenas escrevemos isto para o modelo form due_back)
+            book_instance.due_back = form.cleaned_data['renewal_date']
+            book_instance.save()
+
+            # Redireciona para a nova URL
+            return HttpResponseRedirect(reverse('all-borrowed'))
+
+    # Se é um GET (ou outro metodo) cria um formulário padrão
+    else:
+        proposed_renew_date = datetime.date.today() + datetime.timedelta(weeks=3)
+        form = RenewBookForm(initial={'renewal_date': proposed_renew_date})
+
+    context = {
+        'form': form,
+        'book_instance': book_instance,
+    }
+
+    return render(request, 'catalog/book_renew_librarian.html', context)
+
+
+class AuthorCreate(CreateView):
+    model = Author
+    fields = '__all__'
+    initial = {'date_of_death': '05/01/2018'}
+
+
+class AuthorUpdate(UpdateView):
+    model = Author
+    fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
+
+
+class AuthorDelete(DeleteView):
+    model = Author
+    success_url = reverse_lazy('authors')
